@@ -244,7 +244,7 @@ temp_mount()
 			log_print 0 "Unable to create temporary $2 folder."
 			finish_error
 		fi
-		mount -t ext4 -o ro "$3" "$1"
+		mount -o ro "$3" "$1" 2>/dev/null || mount -t squashfs -o ro "$3" "$1" 2>/dev/null || mount -t ext4 -o ro "$3" "$1" 2>/dev/null || mount -t erofs -o ro "$3" "$1" 2>/dev/null
 		is_mounted=$(ls -A "$1" 2>/dev/null)
 		if [ -n "$is_mounted" ]; then
 			log_print 2 "$2 mounted at $1."
@@ -353,15 +353,19 @@ if [ "$sdkver" -ge 26 ]; then
 
 			temp_mount "$TEMPVEN" "vendor" "$venpath"
 
-			if [ -f "$TEMPVEN/$BUILDPROP" ]; then
-				log_print 2 "Vendor Build.prop exists! Reading vendor properties from build.prop..."
-				vensdkver=$(grep -i 'ro.vendor.build.version.sdk=' "$TEMPVEN/$BUILDPROP"  | cut -f2 -d'=' -s)
+			VPROP="$TEMPVEN/$BUILDPROP"
+			if [ ! -f "$VPROP" ] && [ -f "$TEMPVEN/etc/$BUILDPROP" ]; then
+				VPROP="$TEMPVEN/etc/$BUILDPROP"
+			fi
+			if [ -f "$VPROP" ]; then
+				log_print 2 "Vendor Build.prop exists! Reading vendor properties from $VPROP..."
+				vensdkver=$(grep -i 'ro.vendor.build.version.sdk=' "$VPROP"  | cut -f2 -d'=' -s)
 				log_print 2 "Current vendor Android SDK version: $vensdkver"
 				if [ "$vensdkver" -gt 25 ]; then
 					log_print 2 "Current vendor is Oreo or above. Proceed with setting vendor security patch level..."
 					venpatchlevel=$(getprop ro.vendor.build.security_patch)
 					log_print 2 "Current Vendor Security Patch Level: $venpatchlevel"
-					venpatchlevel_device=$(grep -i 'ro.vendor.build.security_patch=' "$TEMPVEN/$BUILDPROP"  | cut -f2 -d'=' -s)
+					venpatchlevel_device=$(grep -i 'ro.vendor.build.security_patch=' "$VPROP"  | cut -f2 -d'=' -s)
 					if ! [ "$venpatchlevel" = "venpatchlevel_device" ]; then
 						$setprop_bin "ro.vendor.build.security_patch" "$venpatchlevel_device"
 						sed -i "s/ro.vendor.build.security_patch=.*/ro.vendor.build.security_patch=""$venpatchlevel_device""/g" "/$DEFAULTPROP" ;
@@ -399,14 +403,20 @@ if [ "$sdkver" -ge 26 ]; then
 
 		temp_mount "$TEMPSYS" "system" "$syspath"
 
-		if [ -f "$TEMPSYS/$BUILDPROP" ]; then
-			log_print 2 "Build.prop exists! Reading system properties from build.prop..."
-			sdkver=$(grep -i 'ro.build.version.sdk=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+		SYS_PROP="$TEMPSYS/$BUILDPROP"
+		if [ ! -f "$SYS_PROP" ] && [ -f "$TEMPSYS/etc/$BUILDPROP" ]; then
+			SYS_PROP="$TEMPSYS/etc/$BUILDPROP"
+		elif [ ! -f "$SYS_PROP" ] && [ -f "$TEMPSYS/system/etc/$BUILDPROP" ]; then
+			SYS_PROP="$TEMPSYS/system/etc/$BUILDPROP"
+		fi
+		if [ -f "$SYS_PROP" ]; then
+			log_print 2 "Build.prop exists! Reading system properties from $SYS_PROP..."
+			sdkver=$(grep -i 'ro.build.version.sdk=' "$SYS_PROP"  | cut -f2 -d'=' -s)
 			log_print 2 "Current system Android SDK version: $sdkver"
 			if [ "$sdkver" -gt 25 ]; then
 				log_print 2 "Current system is Oreo or above. Proceed with setting OS Version & Security Patch Level..."
 				log_print 2 "Current OS Version: $osver"
-				osver=$(grep -i 'ro.build.version.release=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+				osver=$(grep -i 'ro.build.version.release=' "$SYS_PROP"  | cut -f2 -d'=' -s)
 				if [ -n "$osver" ]; then
 					$setprop_bin "ro.build.version.release" "$osver"
 					sed -i "s/ro.build.version.release=.*/ro.build.version.release=""$osver""/g" "/$DEFAULTPROP" ;
@@ -424,7 +434,7 @@ if [ "$sdkver" -ge 26 ]; then
 					fi
 				fi
 				log_print 2 "Current Security Patch Level: $patchlevel"
-				patchlevel=$(grep -i 'ro.build.version.security_patch=' "$TEMPSYS/$BUILDPROP"  | cut -f2 -d'=' -s)
+				patchlevel=$(grep -i 'ro.build.version.security_patch=' "$SYS_PROP"  | cut -f2 -d'=' -s)
 				if [ -n "$patchlevel" ]; then
 					$setprop_bin "ro.build.version.security_patch" "$patchlevel"
 					sed -i "s/ro.build.version.security_patch=.*/ro.build.version.security_patch=""$patchlevel""/g" "/$DEFAULTPROP" ;
