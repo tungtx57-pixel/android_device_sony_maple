@@ -47,3 +47,6 @@ TARGET_SCREEN_DENSITY := 410
 # Add device-specific ones
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
+
+# Include Lineage/Axion BoardConfig Soong variables
+include vendor/lineage/config/BoardConfigLineage.mk
