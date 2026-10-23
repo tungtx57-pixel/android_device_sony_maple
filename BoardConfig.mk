@@ -28,6 +28,7 @@ TARGET_BOOTLOADER_BOARD_NAME := G8141
 TARGET_KERNEL_CONFIG := lineage-msm8998-yoshino-maple_defconfig
 
 BOARD_KERNEL_CMDLINE += androidboot.hardware=maple
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
 
 # Point to the prebuilt kernel
 TARGET_FORCE_PREBUILT_KERNEL := true
