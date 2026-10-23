@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2017 The LineageOS Open Source Project
+# Copyright (C) 2026 AxionAOSP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +16,13 @@
 #
 
 PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/axion_maple.mk \
     $(LOCAL_DIR)/lineage_maple.mk
 
 COMMON_LUNCH_CHOICES := \
+    axion_maple-user \
+    axion_maple-userdebug \
+    axion_maple-eng \
     lineage_maple-user \
     lineage_maple-userdebug \
     lineage_maple-eng
