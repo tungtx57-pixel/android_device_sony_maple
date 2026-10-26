@@ -16,5 +16,5 @@
 /dev/block/bootdevice/by-name/modemst1         /efs1                    emmc     defaults                                                                                          defaults
 /dev/block/bootdevice/by-name/modemst2         /efs2                    emmc     defaults                                                                                          defaults
 #/dev/block/bootdevice/by-name/persist          /mnt/vendor/persist      ext4     noatime,nosuid,nodev,barrier=1                                                                    wait,check,notrim
-/dev/block/mmcblk0p1                           /sdcard1                 auto     nosuid,nodev                                                                                      wait,voldmanaged=sdcard1:auto
-/dev/block/sdg1                                /usb-otg                 auto     defaults                                                                                          voldmanaged=usb:auto
+#/dev/block/mmcblk0p1                           /sdcard1                 auto     nosuid,nodev                                                                                      wait,voldmanaged=sdcard1:auto
+#/dev/block/sdg1                                /usb-otg                 auto     defaults                                                                                          voldmanaged=usb:auto
